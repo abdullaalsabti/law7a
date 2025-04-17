@@ -1,0 +1,124 @@
+.artist-card {
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background-color: white;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+}
+
+.artist-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.artist-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  height: 100%;
+}
+
+.artist-image-container {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.artist-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.artist-card:hover .artist-image {
+  transform: scale(1.05);
+}
+
+.artist-featured-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: var(--accent-color);
+  color: var(--text-color);
+  padding: 0.3rem 0.6rem;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  z-index: 1;
+}
+
+.rtl .artist-featured-badge {
+  right: auto;
+  left: 10px;
+}
+
+.artist-info {
+  padding: 1.2rem;
+}
+
+.artist-name {
+  font-size: 1.25rem;
+  margin-bottom: 0.3rem;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.artist-location {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+}
+
+.artist-location::before {
+  content: "📍";
+  margin-right: 0.5rem;
+}
+
+.rtl .artist-location::before {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+.artist-bio {
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.artist-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.artist-tag {
+  background-color: #f0f0f0;
+  padding: 0.2rem 0.6rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+@media (max-width: 768px) {
+  .artist-image-container {
+    height: 180px;
+  }
+
+  .artist-name {
+    font-size: 1.1rem;
+  }
+
+  .artist-bio {
+    font-size: 0.85rem;
+  }
+
+  .artist-tag {
+    font-size: 0.75rem;
+  }
+}

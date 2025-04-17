@@ -1,0 +1,270 @@
+.header {
+  background-color: #fff;
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.logo-text {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-left: 0.5rem;
+}
+
+.rtl .logo-text {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+.search-bar {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 1.5rem;
+}
+
+.search-bar form {
+  display: flex;
+  position: relative;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 0.6rem 2.5rem 0.6rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 30px;
+  font-size: 0.9rem;
+  transition: border-color 0.3s ease;
+}
+
+.rtl .search-bar input {
+  padding: 0.6rem 1rem 0.6rem 2.5rem;
+}
+
+.search-bar input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+.search-bar button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.rtl .search-bar button {
+  right: auto;
+  left: 10px;
+}
+
+.nav-menu ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.nav-menu li {
+  margin: 0 0.8rem;
+}
+
+.nav-menu a {
+  text-decoration: none;
+  color: var(--text-color);
+  font-weight: 500;
+  transition: color 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.nav-menu a:hover {
+  color: var(--primary-color);
+}
+
+.language-toggle {
+  background: none;
+  border: 1px solid var(--primary-color);
+  color: var(--primary-color);
+  padding: 0.3rem 0.6rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.language-toggle:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.cart-link {
+  position: relative;
+}
+
+.cart-count {
+  position: absolute;
+  top: -8px;
+  right: -12px;
+  background-color: var(--secondary-color);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.rtl .cart-count {
+  right: auto;
+  left: -12px;
+}
+
+.menu-toggle,
+.mobile-controls {
+  display: none;
+}
+
+.auth-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  font-weight: 500;
+  padding: 0;
+  font-size: 0.95rem;
+}
+
+.logout-btn:hover {
+  color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    padding: 0.8rem;
+  }
+
+  .logo-text {
+    font-size: 1.5rem;
+  }
+
+  .search-bar {
+    max-width: 180px;
+    margin: 0 0.5rem;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .menu-toggle {
+    display: block;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-color);
+  }
+}
+
+@media (max-width: 640px) {
+  .header-container {
+    flex-wrap: wrap;
+  }
+
+  .search-bar {
+    order: 3;
+    margin: 0.8rem 0 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 60px;
+    right: -100%;
+    width: 80%;
+    max-width: 300px;
+    background-color: white;
+    height: calc(100vh - 60px);
+    transition: right 0.3s ease;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+
+  .rtl .nav-menu {
+    right: auto;
+    left: -100%;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .nav-menu.open {
+    right: 0;
+  }
+
+  .rtl .nav-menu.open {
+    left: 0;
+    right: auto;
+  }
+
+  .nav-menu ul {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+  }
+
+  .nav-menu li {
+    margin: 1rem 0;
+    width: 100%;
+  }
+
+  .auth-links {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+}

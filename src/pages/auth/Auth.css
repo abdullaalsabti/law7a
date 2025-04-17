@@ -1,0 +1,244 @@
+.auth-page {
+  min-height: calc(100vh - 150px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.auth-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  max-width: 1100px;
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.auth-box {
+  padding: 3rem;
+}
+
+.auth-title {
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.auth-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.auth-form {
+  margin-bottom: 1.5rem;
+}
+
+.auth-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.auth-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"] {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.auth-form input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin-right: 0.5rem;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.rtl .checkbox-label input[type="checkbox"] {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+.checkbox-label span {
+  font-weight: 400;
+}
+
+.forgot-password {
+  text-align: right;
+  margin-top: -1rem;
+}
+
+.rtl .forgot-password {
+  text-align: left;
+}
+
+.forgot-link {
+  color: var(--primary-color);
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+.auth-submit {
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+
+.auth-terms {
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: #666;
+  text-align: center;
+}
+
+.auth-terms a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.auth-terms a:hover {
+  text-decoration: underline;
+}
+
+.auth-alternate {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.auth-alternate a {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 0.3rem;
+}
+
+.rtl .auth-alternate a {
+  margin-left: 0;
+  margin-right: 0.3rem;
+}
+
+.auth-alternate a:hover {
+  text-decoration: underline;
+}
+
+.auth-info {
+  background: linear-gradient(135deg, var(--primary-color), #4527a0);
+  color: white;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.auth-info-content {
+  max-width: 400px;
+}
+
+.auth-info h2 {
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-info p {
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.artist-register-info {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.artist-register-info h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.auth-benefits {
+  list-style-type: none;
+  padding: 0;
+  margin: 1.5rem 0 0;
+}
+
+.auth-benefits li {
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+}
+
+.auth-benefits li::before {
+  content: "✓";
+  margin-right: 0.5rem;
+  color: var(--accent-color);
+  font-weight: bold;
+}
+
+.rtl .auth-benefits li::before {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .auth-container {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-info {
+    display: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .auth-page {
+    padding: 1rem;
+  }
+
+  .auth-box {
+    padding: 2rem 1.5rem;
+  }
+
+  .auth-title {
+    font-size: 1.8rem;
+  }
+}
