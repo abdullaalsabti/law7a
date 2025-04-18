@@ -10,37 +10,35 @@ interface ArtistCardProps {
 }
 
 const ArtistCard: React.FC<ArtistCardProps> = ({ artist, language }) => {
+  const artistName = getTextByLanguage(artist.name, language);
+  const artistLocation = getTextByLanguage(artist.location, language);
+  const artistBio = getTextByLanguage(artist.bio, language);
+  const truncatedBio =
+    artistBio.length > 100 ? `${artistBio.substring(0, 100)}...` : artistBio;
+
   return (
-    <div className="artist-card">
-      <Link to={`/artist/${artist.id}`} className="artist-card-link">
-        <div className="artist-image-container">
+    <Link to={`/artist/${artist.id}`} className="artist-card">
+      <div className="artist-header">
+        <div className="artist-avatar-container">
           <img
             src={artist.profilePicture || "/images/placeholder-profile.jpg"}
-            alt={getTextByLanguage(artist.name, language)}
+            alt={artistName}
             className="artist-image"
             loading="lazy"
           />
-          {artist.featured && (
-            <div className="artist-featured-badge">
-              <span>{language === "en" ? "Featured" : "مميز"}</span>
-            </div>
-          )}
         </div>
-        <div className="artist-info">
-          <h3 className="artist-name">
-            {getTextByLanguage(artist.name, language)}
-          </h3>
-          <p className="artist-location">
-            {getTextByLanguage(artist.location, language)}
-          </p>
-          <p className="artist-bio">
-            {getTextByLanguage(artist.bio, language).length > 100
-              ? `${getTextByLanguage(artist.bio, language).substring(
-                  0,
-                  100
-                )}...`
-              : getTextByLanguage(artist.bio, language)}
-          </p>
+        <div className="artist-header-info">
+          <h3 className="artist-name">{artistName}</h3>
+          <p className="artist-location">{artistLocation}</p>
+        </div>
+      </div>
+
+      <div className="artist-bio-container">
+        <p className="artist-bio">{truncatedBio}</p>
+      </div>
+
+      <div className="artist-footer">
+        {artist.tags && artist.tags.length > 0 && (
           <div className="artist-tags">
             {artist.tags.slice(0, 3).map((tag, index) => (
               <span key={index} className="artist-tag">
@@ -48,9 +46,15 @@ const ArtistCard: React.FC<ArtistCardProps> = ({ artist, language }) => {
               </span>
             ))}
           </div>
-        </div>
-      </Link>
-    </div>
+        )}
+
+        {artist.featured && (
+          <span className="artist-featured-badge">
+            {language === "en" ? "Featured" : "مميز"}
+          </span>
+        )}
+      </div>
+    </Link>
   );
 };
 
