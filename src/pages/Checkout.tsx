@@ -515,11 +515,11 @@ const Checkout: React.FC<CheckoutProps> = ({ language }) => {
                       <div className="checkout-item-details">
                         <h4>{item.product.title.en}</h4>
                         <p>
-                          {formatCurrency(item.product.price)} x {item.quantity}
+                          {formatCurrency(item.product.price, "JOD")} x {item.quantity}
                         </p>
                       </div>
                       <div className="checkout-item-total">
-                        {formatCurrency(item.product.price * item.quantity)}
+                        {formatCurrency(item.product.price * item.quantity, "JOD")}
                       </div>
                     </div>
                   ))}
@@ -603,7 +603,7 @@ const Checkout: React.FC<CheckoutProps> = ({ language }) => {
                     {item.product.title.en} x {item.quantity}
                   </span>
                   <span>
-                    {formatCurrency(item.product.price * item.quantity)}
+                    {formatCurrency(item.product.price * item.quantity, "JOD")}
                   </span>
                 </div>
               ))}

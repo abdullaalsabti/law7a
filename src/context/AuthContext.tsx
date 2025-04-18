@@ -1,10 +1,18 @@
-import React, { createContext, useState, useContext, ReactNode } from "react";
+import React, { createContext, useState, useContext, useEffect, ReactNode } from "react";
+import { onAuthStateChanged } from "firebase/auth";
 import { User } from "../types";
-import { mockUsers } from "../utils/mockData";
+import { auth } from "../firebase/config";
+import {
+  registerWithEmailAndPassword,
+  loginWithEmailAndPassword,
+  logoutUser,
+  getCurrentUserData
+} from "../firebase/auth";
 
 interface AuthContextType {
   currentUser: User | null;
   isAuthenticated: boolean;
+  loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   signUp: (userData: {
@@ -21,32 +29,44 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  // Listen for auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // User is signed in
+        const userData = await getCurrentUserData(firebaseUser);
+        setCurrentUser(userData);
+      } else {
+        // User is signed out
+        setCurrentUser(null);
+      }
+      setLoading(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // In a real app, you would make an API call to validate credentials
-    // For demo, we're using mock data and simplifying authentication
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      const user = mockUsers.find((user) => user.email === email);
-
-      if (user) {
-        setCurrentUser(user);
-        localStorage.setItem("user", JSON.stringify(user));
-        return true;
-      }
-
-      return false;
+      const user = await loginWithEmailAndPassword(email, password);
+      setCurrentUser(user);
+      return true;
     } catch (error) {
       console.error("Login error:", error);
       return false;
     }
   };
 
-  const logout = () => {
-    setCurrentUser(null);
-    localStorage.removeItem("user");
+  const logout = async () => {
+    try {
+      await logoutUser();
+      setCurrentUser(null);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   const signUp = async (userData: {
@@ -55,33 +75,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     password: string;
     isArtist: boolean;
   }): Promise<boolean> => {
-    // In a real app, you would make an API call to register the user
     try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Check if email already exists
-      const existingUser = mockUsers.find(
-        (user) => user.email === userData.email
+      const user = await registerWithEmailAndPassword(
+        userData.email,
+        userData.password,
+        userData.name,
+        userData.isArtist
       );
-
-      if (existingUser) {
-        return false;
-      }
-
-      // Create new user with random ID (in a real app this would be done by backend)
-      const newUser: User = {
-        id: `user${Math.floor(Math.random() * 10000)}`,
-        name: userData.name,
-        email: userData.email,
-        isArtist: userData.isArtist,
-      };
-
-      // In a real app, this would be saved to the database
-      // For demo, we just set the current user
-      setCurrentUser(newUser);
-      localStorage.setItem("user", JSON.stringify(newUser));
-
+      setCurrentUser(user);
       return true;
     } catch (error) {
       console.error("Signup error:", error);
@@ -97,6 +98,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         login,
         logout,
         signUp,
+        loading,
       }}
     >
       {children}

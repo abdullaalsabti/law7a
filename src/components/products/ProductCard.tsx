@@ -15,16 +15,24 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, language }) => {
   const productTitle = getTextByLanguage(product.title, language);
+  const productDescription = getTextByLanguage(product.description, language);
   const categoryName = getCategoryName(product.category, language);
+  // Use JOD as default currency if not specified in the product
   const formattedPrice = formatCurrency(
     product.price,
-    product.currency,
+    "JOD", // Default to Jordanian Dinar
     language
   );
 
+  // Truncate description to 2 lines
+  const truncatedDescription = 
+    productDescription.length > 80 
+      ? `${productDescription.substring(0, 80)}...` 
+      : productDescription;
+
   return (
-    <div className="product-card">
-      <Link to={`/product/${product.id}`} className="product-card-link">
+    <Link to={`/product/${product.id}`} className="product-card">
+      <div className="product-image-wrapper">
         <div className="product-image-container">
           <img
             src={product.images?.[0] || "/images/placeholder.jpg"}
@@ -32,26 +40,30 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, language }) => {
             className="product-image"
             loading="lazy"
           />
-          {!product.inStock && (
-            <div className="out-of-stock-overlay">
-              {language === "en" ? "Out of Stock" : "نفذ من المخزون"}
-            </div>
-          )}
+        </div>
+        
+        {/* Status indicators */}
+        <div className="product-status">
           {product.featured && (
-            <div className="featured-badge">
+            <span className="featured-badge">
               {language === "en" ? "Featured" : "مميز"}
-            </div>
+            </span>
+          )}
+          {!product.inStock && (
+            <span className="stock-badge out-of-stock">
+              {language === "en" ? "Out of Stock" : "نفذ من المخزون"}
+            </span>
           )}
         </div>
-        <div className="product-info">
-          <h3 className="product-title">{productTitle}</h3>
-          <div className="product-meta">
-            <span className="product-category">{categoryName}</span>
-            <span className="product-price">{formattedPrice}</span>
-          </div>
-        </div>
-      </Link>
-    </div>
+      </div>
+      
+      <div className="product-content">
+        <div className="product-category">{categoryName}</div>
+        <h3 className="product-title">{productTitle}</h3>
+        <p className="product-description">{truncatedDescription}</p>
+        <div className="product-price">{formattedPrice}</div>
+      </div>
+    </Link>
   );
 };
 

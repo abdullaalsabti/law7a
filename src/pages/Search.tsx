@@ -8,9 +8,10 @@ import {
   ProductMedium,
 } from "../types";
 import { getUIText, getCategoryName, getMediumName } from "../utils/language";
-import { mockProducts, mockArtists } from "../utils/mockData";
+import { searchProducts, searchArtists } from "../firebase/search";
 import ProductCard from "../components/products/ProductCard";
 import ArtistCard from "../components/artist/ArtistCard";
+import { QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 import "./Search.css";
 
 interface SearchProps {
@@ -24,16 +25,21 @@ const useQuery = () => {
 
 const Search: React.FC<SearchProps> = ({ language }) => {
   const query = useQuery();
-  const searchQuery = query.get("q") || "";
-  const initialCategory = query.get("category") || "";
-  const initialType = query.get("type") || "product";
+  const searchQuery = query.get("q") ?? "";
+  const initialCategory = query.get("category") ?? "";
+  const initialType = query.get("type") ?? "product";
 
   // State for results
   const [products, setProducts] = useState<Product[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [filteredArtists, setFilteredArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [lastProductDoc, setLastProductDoc] = useState<
+    QueryDocumentSnapshot<DocumentData> | undefined
+  >(undefined);
+  const [lastArtistDoc, setLastArtistDoc] = useState<
+    QueryDocumentSnapshot<DocumentData> | undefined
+  >(undefined);
 
   // State for filters
   const [searchType, setSearchType] = useState<"product" | "artist">(
@@ -49,155 +55,203 @@ const Search: React.FC<SearchProps> = ({ language }) => {
   });
   const [currentQuery, setCurrentQuery] = useState<string>(searchQuery);
 
-  // Available category and medium options
-  const categories: ProductCategory[] = [
-    "painting",
-    "pottery",
-    "calligraphy",
-    "digital",
-    "sculpture",
-    "jewelry",
-    "photography",
-    "textile",
-    "other",
-  ];
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage] = useState<number>(12);
 
-  const mediums: ProductMedium[] = [
-    "oil",
-    "acrylic",
-    "watercolor",
-    "mixed_media",
-    "ceramic",
-    "wood",
-    "metal",
-    "digital",
-    "clay",
-    "glass",
-    "fabric",
-    "paper",
-    "other",
-  ];
+  // State for expanded checkbox lists
+  const [showAllCategories, setShowAllCategories] = useState<boolean>(false);
+  const [showAllMediums, setShowAllMediums] = useState<boolean>(false);
 
-  // Load initial data
+
+
+  // Load initial data from Firestore
   useEffect(() => {
-    setLoading(true);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        if (searchType === "product") {
+          // Log the query parameters for debugging
+          console.log("Searching products with:", {
+            query: currentQuery,
+            categories: selectedCategories.length > 0 ? selectedCategories : undefined,
+            mediums: selectedMediums.length > 0 ? selectedMediums : undefined,
+            priceRange
+          });
 
-    // Simulate API call delay
-    setTimeout(() => {
-      setProducts(mockProducts);
-      setArtists(mockArtists);
-      setLoading(false);
-    }, 500);
-  }, []);
+          const { products: fetchedProducts, lastDoc } = await searchProducts(
+            currentQuery || undefined, // Pass undefined instead of empty string
+            selectedCategories.length > 0 ? selectedCategories : undefined,
+            selectedMediums.length > 0 ? selectedMediums : undefined,
+            priceRange.min === 0 && priceRange.max === 1000 ? undefined : priceRange, // Don't filter by price if using default range
+            undefined,
+            itemsPerPage
+          );
 
-  // Apply filters whenever filters or data changes
-  useEffect(() => {
-    if (loading) return;
+          console.log(`Found ${fetchedProducts.length} products`);
+          setProducts(fetchedProducts);
+          setLastProductDoc(lastDoc || undefined);
+          setHasMore(fetchedProducts.length === itemsPerPage);
+        } else {
+          console.log("Searching artists with:", {
+            query: currentQuery
+          });
 
-    if (searchType === "product") {
-      let filtered = [...products];
+          const { artists: fetchedArtists, lastDoc } = await searchArtists(
+            currentQuery || undefined, // Pass undefined instead of empty string
+            undefined,
+            itemsPerPage
+          );
 
-      // Apply search query filter
-      if (currentQuery) {
-        const lowercaseQuery = currentQuery.toLowerCase();
-        filtered = filtered.filter(
-          (product) =>
-            product.title.en.toLowerCase().includes(lowercaseQuery) ||
-            product.title.ar.toLowerCase().includes(lowercaseQuery) ||
-            product.description.en.toLowerCase().includes(lowercaseQuery) ||
-            product.description.ar.toLowerCase().includes(lowercaseQuery) ||
-            product.tags.some((tag) =>
-              tag.toLowerCase().includes(lowercaseQuery)
-            )
-        );
+          console.log(`Found ${fetchedArtists.length} artists`);
+          setArtists(fetchedArtists);
+          setLastArtistDoc(lastDoc || undefined);
+          setHasMore(fetchedArtists.length === itemsPerPage);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // Apply category filter
-      if (selectedCategories.length > 0) {
-        filtered = filtered.filter((product) =>
-          selectedCategories.includes(product.category)
-        );
-      }
-
-      // Apply medium filter
-      if (selectedMediums.length > 0) {
-        filtered = filtered.filter((product) =>
-          selectedMediums.includes(product.medium)
-        );
-      }
-
-      // Apply price range filter
-      filtered = filtered.filter(
-        (product) =>
-          product.price >= priceRange.min && product.price <= priceRange.max
-      );
-
-      setFilteredProducts(filtered);
-    } else {
-      // Artist filtering
-      let filtered = [...artists];
-
-      // Apply search query filter
-      if (currentQuery) {
-        const lowercaseQuery = currentQuery.toLowerCase();
-        filtered = filtered.filter(
-          (artist) =>
-            artist.name.en.toLowerCase().includes(lowercaseQuery) ||
-            artist.name.ar.toLowerCase().includes(lowercaseQuery) ||
-            artist.bio.en.toLowerCase().includes(lowercaseQuery) ||
-            artist.bio.ar.toLowerCase().includes(lowercaseQuery) ||
-            artist.tags.some((tag) =>
-              tag.toLowerCase().includes(lowercaseQuery)
-            )
-        );
-      }
-
-      setFilteredArtists(filtered);
-    }
+    fetchData();
   }, [
-    loading,
+    searchType,
     currentQuery,
     selectedCategories,
     selectedMediums,
     priceRange,
-    searchType,
-    products,
-    artists,
+    itemsPerPage,
   ]);
 
+  // Load more data when user reaches the end of the list
+  const loadMore = async () => {
+    if (!hasMore || loading) return;
+
+    setLoading(true);
+    try {
+      if (searchType === "product") {
+        console.log("Loading more products with:", {
+          query: currentQuery,
+          categories: selectedCategories.length > 0 ? selectedCategories : undefined,
+          mediums: selectedMediums.length > 0 ? selectedMediums : undefined,
+          priceRange,
+          lastDoc: lastProductDoc ? "exists" : "undefined"
+        });
+
+        const { products: moreProducts, lastDoc } = await searchProducts(
+          currentQuery || undefined, // Pass undefined instead of empty string
+          selectedCategories.length > 0 ? selectedCategories : undefined,
+          selectedMediums.length > 0 ? selectedMediums : undefined,
+          priceRange.min === 0 && priceRange.max === 1000 ? undefined : priceRange, // Don't filter by price if using default range
+          lastProductDoc,
+          itemsPerPage
+        );
+
+        console.log(`Loaded ${moreProducts.length} more products`);
+        setProducts([...products, ...moreProducts]);
+        setLastProductDoc(lastDoc || undefined);
+        setHasMore(moreProducts.length === itemsPerPage);
+      } else {
+        console.log("Loading more artists with:", {
+          query: currentQuery,
+          lastDoc: lastArtistDoc ? "exists" : "undefined"
+        });
+
+        const { artists: moreArtists, lastDoc } = await searchArtists(
+          currentQuery || undefined, // Pass undefined instead of empty string
+          lastArtistDoc,
+          itemsPerPage
+        );
+
+        console.log(`Loaded ${moreArtists.length} more artists`);
+        setArtists([...artists, ...moreArtists]);
+        setLastArtistDoc(lastDoc || undefined);
+        setHasMore(moreArtists.length === itemsPerPage);
+      }
+    } catch (error) {
+      console.error("Error loading more data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle search form submission
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentQuery(searchQuery);
+    // Reset pagination
+    setLastProductDoc(undefined);
+    setLastArtistDoc(undefined);
+    setHasMore(true);
+    setCurrentPage(1);
+    // Reset products/artists to empty to show loading state
+    setProducts([]);
+    setArtists([]);
+  };
+
+  // Handle search type change
+  const handleSearchTypeChange = (type: "product" | "artist") => {
+    setSearchType(type);
+    // Reset pagination
+    setLastProductDoc(undefined);
+    setLastArtistDoc(undefined);
+    setHasMore(true);
+    setCurrentPage(1);
+  };
+
+  // Handle category change
   const handleCategoryChange = (category: ProductCategory) => {
     if (selectedCategories.includes(category)) {
       setSelectedCategories(selectedCategories.filter((c) => c !== category));
     } else {
       setSelectedCategories([...selectedCategories, category]);
     }
+    // Reset pagination
+    setLastProductDoc(undefined);
+    setHasMore(true);
+    setCurrentPage(1);
   };
 
+  // Handle medium change
   const handleMediumChange = (medium: ProductMedium) => {
     if (selectedMediums.includes(medium)) {
       setSelectedMediums(selectedMediums.filter((m) => m !== medium));
     } else {
       setSelectedMediums([...selectedMediums, medium]);
     }
+    // Reset pagination
+    setLastProductDoc(undefined);
+    setHasMore(true);
+    setCurrentPage(1);
   };
 
+  // Handle price range change
   const handlePriceRangeChange = (type: "min" | "max", value: number) => {
     if (type === "min") {
       setPriceRange({ ...priceRange, min: value });
     } else {
       setPriceRange({ ...priceRange, max: value });
     }
+    // Reset pagination
+    setLastProductDoc(undefined);
+    setHasMore(true);
+    setCurrentPage(1);
   };
 
-  const handleResetFilters = () => {
-    setSelectedCategories([]);
-    setSelectedMediums([]);
-    setPriceRange({ min: 0, max: 1000 });
-    setCurrentQuery(searchQuery); // Reset to URL query if any
-  };
+  // Calculate pagination info for display
+  const totalItems =
+    searchType === "product" ? products.length : artists.length;
 
-  if (loading) {
-    return <div className="loading">{getUIText("loading", language)}</div>;
+  // Show loading state for initial load
+  if (loading && products.length === 0 && artists.length === 0) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>{getUIText("loading", language)}</p>
+      </div>
+    );
   }
 
   return (
@@ -206,7 +260,16 @@ const Search: React.FC<SearchProps> = ({ language }) => {
         <aside className="filter-sidebar">
           <div className="filter-header">
             <h2>{getUIText("filters", language)}</h2>
-            <button onClick={handleResetFilters} className="reset-filters-btn">
+            <button 
+              onClick={() => {
+                setSelectedCategories([]);
+                setSelectedMediums([]);
+                setPriceRange({ min: 0, max: 1000 });
+                setCurrentQuery("");
+                setCurrentPage(1);
+              }} 
+              className="reset-filters-btn"
+            >
               {getUIText("resetFilters", language)}
             </button>
           </div>
@@ -215,18 +278,14 @@ const Search: React.FC<SearchProps> = ({ language }) => {
             <h3>{language === "en" ? "Type" : "النوع"}</h3>
             <div className="type-selector">
               <button
-                className={`type-btn ${
-                  searchType === "product" ? "active" : ""
-                }`}
-                onClick={() => setSearchType("product")}
+                className={`type-btn ${searchType === "product" ? "active" : ""}`}
+                onClick={() => handleSearchTypeChange("product")}
               >
                 {language === "en" ? "Products" : "المنتجات"}
               </button>
               <button
-                className={`type-btn ${
-                  searchType === "artist" ? "active" : ""
-                }`}
-                onClick={() => setSearchType("artist")}
+                className={`type-btn ${searchType === "artist" ? "active" : ""}`}
+                onClick={() => handleSearchTypeChange("artist")}
               >
                 {language === "en" ? "Artists" : "الفنانين"}
               </button>
@@ -235,13 +294,18 @@ const Search: React.FC<SearchProps> = ({ language }) => {
 
           <div className="filter-section">
             <h3>{getUIText("search", language)}</h3>
-            <input
-              type="text"
-              className="search-input"
-              placeholder={language === "en" ? "Search..." : "بحث..."}
-              value={currentQuery}
-              onChange={(e) => setCurrentQuery(e.target.value)}
-            />
+            <form onSubmit={handleSearch}>
+              <input
+                type="text"
+                className="search-input"
+                placeholder={language === "en" ? "Search..." : "بحث..."}
+                value={searchQuery}
+                onChange={(e) => setCurrentQuery(e.target.value)}
+              />
+              <button type="submit" className="search-btn">
+                {getUIText("search", language)}
+              </button>
+            </form>
           </div>
 
           {searchType === "product" && (
@@ -249,33 +313,69 @@ const Search: React.FC<SearchProps> = ({ language }) => {
               <div className="filter-section">
                 <h3>{getUIText("categories", language)}</h3>
                 <div className="checkbox-group">
-                  {categories.map((category) => (
+                  {[
+                    "painting",
+                    "pottery",
+                    "calligraphy",
+                    "digital",
+                    "sculpture",
+                    "photography"
+                  ].slice(0, showAllCategories ? 6 : 4).map((category) => (
                     <label key={category} className="checkbox-label">
                       <input
                         type="checkbox"
-                        checked={selectedCategories.includes(category)}
-                        onChange={() => handleCategoryChange(category)}
+                        checked={selectedCategories.includes(category as ProductCategory)}
+                        onChange={() => handleCategoryChange(category as ProductCategory)}
+                        id={`category-${category}`}
                       />
-                      <span>{getCategoryName(category, language)}</span>
+                      <span title={getCategoryName(category as ProductCategory, language)}>
+                        {getCategoryName(category as ProductCategory, language)}
+                      </span>
                     </label>
                   ))}
                 </div>
+                <button 
+                  className="show-more-btn" 
+                  onClick={() => setShowAllCategories(!showAllCategories)}
+                >
+                  {showAllCategories 
+                    ? language === "en" ? "Show Less" : "عرض أقل" 
+                    : language === "en" ? "Show All Categories" : "عرض جميع الفئات"}
+                </button>
               </div>
 
               <div className="filter-section">
                 <h3>{getUIText("medium", language)}</h3>
                 <div className="checkbox-group">
-                  {mediums.map((medium) => (
+                  {[
+                    "oil",
+                    "acrylic",
+                    "watercolor",
+                    "mixed_media",
+                    "ceramic",
+                    "digital"
+                  ].slice(0, showAllMediums ? 6 : 4).map((medium) => (
                     <label key={medium} className="checkbox-label">
                       <input
                         type="checkbox"
-                        checked={selectedMediums.includes(medium)}
-                        onChange={() => handleMediumChange(medium)}
+                        checked={selectedMediums.includes(medium as ProductMedium)}
+                        onChange={() => handleMediumChange(medium as ProductMedium)}
+                        id={`medium-${medium}`}
                       />
-                      <span>{getMediumName(medium, language)}</span>
+                      <span title={getMediumName(medium as ProductMedium, language)}>
+                        {getMediumName(medium as ProductMedium, language)}
+                      </span>
                     </label>
                   ))}
                 </div>
+                <button 
+                  className="show-more-btn" 
+                  onClick={() => setShowAllMediums(!showAllMediums)}
+                >
+                  {showAllMediums 
+                    ? language === "en" ? "Show Less" : "عرض أقل" 
+                    : language === "en" ? "Show All Mediums" : "عرض جميع الوسائط"}
+                </button>
               </div>
 
               <div className="filter-section">
@@ -290,6 +390,7 @@ const Search: React.FC<SearchProps> = ({ language }) => {
                       onChange={(e) =>
                         handlePriceRangeChange("min", Number(e.target.value))
                       }
+                      aria-label={language === "en" ? "Minimum price" : "الحد الأدنى للسعر"}
                     />
                     <span>-</span>
                     <input
@@ -299,26 +400,7 @@ const Search: React.FC<SearchProps> = ({ language }) => {
                       onChange={(e) =>
                         handlePriceRangeChange("max", Number(e.target.value))
                       }
-                    />
-                  </div>
-                  <div className="range-slider">
-                    <input
-                      type="range"
-                      min="0"
-                      max="1000"
-                      value={priceRange.min}
-                      onChange={(e) =>
-                        handlePriceRangeChange("min", Number(e.target.value))
-                      }
-                    />
-                    <input
-                      type="range"
-                      min="0"
-                      max="1000"
-                      value={priceRange.max}
-                      onChange={(e) =>
-                        handlePriceRangeChange("max", Number(e.target.value))
-                      }
+                      aria-label={language === "en" ? "Maximum price" : "الحد الأقصى للسعر"}
                     />
                   </div>
                 </div>
@@ -327,7 +409,7 @@ const Search: React.FC<SearchProps> = ({ language }) => {
           )}
         </aside>
 
-        <main className="search-results">
+        <main className="search-results-container">
           <div className="results-header">
             <h1 className="results-title">
               {searchType === "product"
@@ -340,42 +422,92 @@ const Search: React.FC<SearchProps> = ({ language }) => {
             </h1>
             <p className="results-count">
               {searchType === "product"
-                ? `${filteredProducts.length} ${
-                    language === "en" ? "products found" : "منتج تم العثور عليه"
-                  }`
-                : `${filteredArtists.length} ${
-                    language === "en" ? "artists found" : "فنان تم العثور عليهم"
-                  }`}
+                ? `${products.length} ${language === "en" ? "products found" : "منتج تم العثور عليه"}`
+                : `${artists.length} ${language === "en" ? "artists found" : "فنان تم العثور عليهم"}`}
             </p>
           </div>
 
-          {searchType === "product" ? (
-            filteredProducts.length > 0 ? (
+          <div className="search-results">
+        {searchType === "product" ? (
+          products.length > 0 ? (
+            <>
               <div className="product-grid">
-                {filteredProducts.map((product) => (
-                  <div key={product.id} className="product-item">
-                    <ProductCard product={product} language={language} />
-                  </div>
+                {products.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    language={language}
+                  />
                 ))}
+
+                {/* Load more section */}
+                {loading && (
+                  <div className="loading-more">
+                    <div className="loading-spinner"></div>
+                  </div>
+                )}
+
+                {hasMore && !loading && (
+                  <div className="load-more-container">
+                    <button className="load-more-btn" onClick={loadMore}>
+                      {getUIText("loadMore", language)}
+                    </button>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="no-results">
-                <p>{getUIText("noResults", language)}</p>
+
+              <div className="search-results-info">
+                <span>
+                  {getUIText("showing", language)} {totalItems}{" "}
+                  {getUIText("items", language)}
+                </span>
               </div>
-            )
-          ) : filteredArtists.length > 0 ? (
-            <div className="artist-grid">
-              {filteredArtists.map((artist) => (
-                <div key={artist.id} className="artist-item">
-                  <ArtistCard artist={artist} language={language} />
-                </div>
-              ))}
-            </div>
+            </>
           ) : (
             <div className="no-results">
-              <p>{getUIText("noResults", language)}</p>
+              <p>{getUIText("noProductsFound", language)}</p>
             </div>
-          )}
+          )
+        ) : artists.length > 0 ? (
+          <>
+            <div className="artist-grid">
+              {artists.map((artist) => (
+                <ArtistCard
+                  key={artist.id}
+                  artist={artist}
+                  language={language}
+                />
+              ))}
+
+              {/* Load more section */}
+              {loading && (
+                <div className="loading-more">
+                  <div className="loading-spinner"></div>
+                </div>
+              )}
+
+              {hasMore && !loading && (
+                <div className="load-more-container">
+                  <button className="load-more-btn" onClick={loadMore}>
+                    {getUIText("loadMore", language)}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="search-results-info">
+              <span>
+                {getUIText("showing", language)} {totalItems}{" "}
+                {getUIText("items", language)}
+              </span>
+            </div>
+          </>
+        ) : (
+          <div className="no-results">
+            <p>{getUIText("noArtistsFound", language)}</p>
+          </div>
+        )}
+          </div>
         </main>
       </div>
     </div>

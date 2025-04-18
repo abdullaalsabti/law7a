@@ -4,7 +4,9 @@ import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import Home from "./pages/Home";
 import ArtistProfile from "./pages/ArtistProfile";
+import UserProfile from "./pages/UserProfile";
 import ProductPage from "./pages/ProductPage";
+import ProductEdit from "./pages/ProductEdit";
 import Search from "./pages/Search";
 import Login from "./pages/auth/Login";
 import SignUp from "./pages/auth/SignUp";
@@ -43,6 +45,18 @@ function App() {
             <Route
               path="/checkout"
               element={<Checkout language={language} />}
+            />
+            <Route
+              path="/profile"
+              element={<UserProfile language={language} />}
+            />
+            <Route
+              path="/product/:id/edit"
+              element={<ProductEdit language={language} />}
+            />
+            <Route
+              path="/product/new"
+              element={<ProductEdit language={language} />}
             />
           </Routes>
         </main>

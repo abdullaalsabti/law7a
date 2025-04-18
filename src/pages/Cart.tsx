@@ -80,7 +80,7 @@ const Cart: React.FC<CartProps> = ({ language }) => {
                   <p className="cart-item-price">
                     {formatCurrency(
                       item.product.price,
-                      item.product.currency,
+                      "JOD", // Default to Jordanian Dinar
                       language
                     )}
                   </p>
@@ -132,7 +132,7 @@ const Cart: React.FC<CartProps> = ({ language }) => {
                 <p className="subtotal-value">
                   {formatCurrency(
                     item.product.price * item.quantity,
-                    item.product.currency,
+                    "JOD", // Default to Jordanian Dinar
                     language
                   )}
                 </p>

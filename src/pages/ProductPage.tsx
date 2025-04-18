@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Language, Product } from "../types";
+import { Language, Product, Artist } from "../types";
 import {
   getTextByLanguage,
   formatCurrency,
@@ -8,9 +8,11 @@ import {
   getMediumName,
   getUIText,
 } from "../utils/language";
-import { mockProducts, mockArtists } from "../utils/mockData";
 import { useCart } from "../context/CartContext";
 import ProductCard from "../components/products/ProductCard";
+import { getProductById } from "../firebase/products";
+import { getArtistById } from "../firebase/artists";
+import { searchProducts } from "../firebase/search";
 import "./ProductPage.css";
 
 interface ProductPageProps {
@@ -23,6 +25,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ language }) => {
   const { addToCart } = useCart();
 
   const [product, setProduct] = useState<Product | null>(null);
+  const [artist, setArtist] = useState<Artist | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [mainImage, setMainImage] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
@@ -30,37 +33,65 @@ const ProductPage: React.FC<ProductPageProps> = ({ language }) => {
   const [error, setError] = useState<boolean>(false);
 
   useEffect(() => {
-    // In a real app, this would be an API call
-    const fetchProduct = () => {
+    // Fetch product from Firebase
+    const fetchProduct = async () => {
+      if (!id) return;
+      
       setLoading(true);
+      setError(false);
+      
       try {
-        // Simulate API delay
-        setTimeout(() => {
-          const foundProduct = mockProducts.find((p) => p.id === id);
+        // Get product from Firebase
+        const foundProduct = await getProductById(id);
 
-          if (!foundProduct) {
-            setError(true);
-            return;
-          }
-
-          setProduct(foundProduct);
-          setMainImage(foundProduct.images[0] || "");
-
-          // Get related products (same category or artist)
-          const related = mockProducts
-            .filter(
-              (p) =>
-                p.id !== foundProduct.id &&
-                (p.category === foundProduct.category ||
-                  p.artistId === foundProduct.artistId)
-            )
-            .slice(0, 4);
-
-          setRelatedProducts(related);
+        if (!foundProduct) {
+          console.error(`Product with ID ${id} not found`);
+          setError(true);
           setLoading(false);
-        }, 300);
-      } catch (err) {
-        console.error("Error fetching product:", err);
+          return;
+        }
+
+        console.log("Product loaded successfully:", foundProduct);
+        setProduct(foundProduct);
+        
+        // Set main image if available
+        if (foundProduct.images && foundProduct.images.length > 0) {
+          setMainImage(foundProduct.images[0]);
+        }
+        
+        // Fetch artist information
+        try {
+          const artistData = await getArtistById(foundProduct.artistId);
+          if (artistData) {
+            setArtist(artistData);
+          }
+        } catch (artistError) {
+          console.error("Error fetching artist:", artistError);
+          // Don't set error state, just log it
+        }
+
+        // Get related products (same category)
+        try {
+          const { products: relatedProductsResult } = await searchProducts(
+            undefined,
+            [foundProduct.category],
+            undefined,
+            undefined,
+            undefined,
+            4
+          );
+          
+          // Filter out the current product
+          const filteredRelated = relatedProductsResult.filter(p => p.id !== id);
+          setRelatedProducts(filteredRelated);
+        } catch (relatedError) {
+          console.error("Error fetching related products:", relatedError);
+          // Don't set error state, just log it
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching product:", error);
         setError(true);
         setLoading(false);
       }
@@ -122,7 +153,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ language }) => {
     );
   }
 
-  const artist = mockArtists.find((a) => a.id === product.artistId);
+  // Artist is now fetched from Firebase in the useEffect
 
   return (
     <div className="product-page">
@@ -163,15 +194,26 @@ const ProductPage: React.FC<ProductPageProps> = ({ language }) => {
             {getTextByLanguage(product.title, language)}
           </h1>
 
-          {artist && (
-            <Link to={`/artist/${artist.id}`} className="product-artist">
-              {getUIText("artist", language)}:{" "}
-              {getTextByLanguage(artist.name, language)}
-            </Link>
-          )}
+          <div className="artist-info">
+            {artist ? (
+              <Link to={`/artist/${artist.id}`} className="artist-link">
+                <div className="artist-avatar">
+                  <img
+                    src={artist.profilePicture || "/images/default-avatar.png"}
+                    alt={getTextByLanguage(artist.name, language)}
+                  />
+                </div>
+                <div className="artist-name">
+                  {getTextByLanguage(artist.name, language)}
+                </div>
+              </Link>
+            ) : (
+              <div className="artist-loading">Loading artist information...</div>
+            )}
+          </div>
 
           <div className="product-price">
-            {formatCurrency(product.price, product.currency, language)}
+            {formatCurrency(product.price, "JOD", language)}
           </div>
 
           <div className="product-meta">
