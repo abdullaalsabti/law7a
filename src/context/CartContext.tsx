@@ -6,12 +6,12 @@ import React, {
   useEffect,
 } from "react";
 import { CartItem, Product } from "../types";
-import { mockProducts } from "../utils/mockData";
+import { getProductById } from "../firebase/products";
 
 interface CartContextType {
   cartItems: CartItem[];
   cart: CartItem[];
-  addToCart: (productId: string, quantity: number) => void;
+  addToCart: (productId: string, quantity: number) => Promise<void>;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -55,12 +55,17 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
     setCartCount(count);
   }, [cartItems]);
 
-  const findProductById = (productId: string): Product | undefined => {
-    return mockProducts.find((product) => product.id === productId);
+  const findProductById = async (productId: string): Promise<Product | null> => {
+    try {
+      return await getProductById(productId);
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      return null;
+    }
   };
 
-  const addToCart = (productId: string, quantity: number) => {
-    const product = findProductById(productId);
+  const addToCart = async (productId: string, quantity: number) => {
+    const product = await findProductById(productId);
 
     if (!product) {
       console.error("Product not found");
@@ -123,20 +128,21 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({
     localStorage.removeItem("cart");
   };
 
+  // Use useMemo to prevent unnecessary re-renders
+  const contextValue = React.useMemo(() => ({
+    cartItems,
+    cart: cartItems,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    cartTotal,
+    total: cartTotal,
+    cartCount,
+  }), [cartItems, cartTotal, cartCount, addToCart, removeFromCart, updateQuantity, clearCart]);
+
   return (
-    <CartContext.Provider
-      value={{
-        cartItems,
-        cart: cartItems,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        clearCart,
-        cartTotal,
-        total: cartTotal,
-        cartCount,
-      }}
-    >
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );

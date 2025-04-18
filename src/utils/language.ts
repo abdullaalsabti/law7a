@@ -288,7 +288,9 @@ export const getTranslations = (language: Language) => {
         ? "You can track your order status in your account dashboard."
         : "يمكنك تتبع حالة طلبك في لوحة تحكم حسابك.",
     checkout_continue_shopping:
-      language === "en" ? "Continue Shopping" : "مواصلة التسوق",
+      language === "en" ? "Continue Shopping" : "متابعة التسوق",
+    checkout_print_receipt:
+      language === "en" ? "Print Receipt" : "طباعة الإيصال",
     checkout_continue_to_payment:
       language === "en" ? "Continue to Payment" : "متابعة إلى الدفع",
     checkout_back: language === "en" ? "Back" : "رجوع",
@@ -314,8 +316,12 @@ export const getTranslations = (language: Language) => {
         : "يرجى إدخال رمز تحقق صالح",
     checkout_error:
       language === "en"
-        ? "An error occurred. Please try again."
-        : "حدث خطأ. يرجى المحاولة مرة أخرى.",
+        ? "An error occurred during checkout. Please try again."
+        : "حدث خطأ أثناء الدفع. يرجى المحاولة مرة أخرى.",
+    checkout_payment_failed:
+      language === "en"
+        ? "Payment validation failed. Please check your card details and try again."
+        : "فشل التحقق من الدفع. يرجى التحقق من تفاصيل بطاقتك والمحاولة مرة أخرى.",
     checkout_order_complete:
       language === "en" ? "Order Complete!" : "تم إكمال الطلب!",
     checkout_order_confirmation_email:

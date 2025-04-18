@@ -100,17 +100,59 @@ const ProductPage: React.FC<ProductPageProps> = ({ language }) => {
     fetchProduct();
   }, [id]);
 
-  const handleAddToCart = () => {
+  const [addingToCart, setAddingToCart] = useState<boolean>(false);
+  const [notification, setNotification] = useState<{ show: boolean; message: string }>({ 
+    show: false, 
+    message: ""
+  });
+
+  const handleAddToCart = async () => {
     if (product) {
-      addToCart(product.id, quantity);
-      // Show a confirmation or notification here
+      setAddingToCart(true);
+      try {
+        await addToCart(product.id, quantity);
+        // Show a confirmation notification
+        setNotification({
+          show: true,
+          message: language === "en" 
+            ? `${quantity} item(s) added to cart` 
+            : `تمت إضافة ${quantity} عنصر إلى سلة التسوق`
+        });
+        
+        // Hide notification after 3 seconds
+        setTimeout(() => {
+          setNotification({ show: false, message: "" });
+        }, 3000);
+      } catch (error) {
+        console.error("Error adding to cart:", error);
+        setNotification({
+          show: true,
+          message: language === "en" 
+            ? "Error adding to cart" 
+            : "خطأ في إضافة المنتج إلى سلة التسوق"
+        });
+      } finally {
+        setAddingToCart(false);
+      }
     }
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (product) {
-      addToCart(product.id, quantity);
-      navigate("/cart");
+      setAddingToCart(true);
+      try {
+        await addToCart(product.id, quantity);
+        navigate("/cart");
+      } catch (error) {
+        console.error("Error adding to cart:", error);
+        setNotification({
+          show: true,
+          message: language === "en" 
+            ? "Error adding to cart" 
+            : "خطأ في إضافة المنتج إلى سلة التسوق"
+        });
+        setAddingToCart(false);
+      }
     }
   };
 
@@ -157,6 +199,21 @@ const ProductPage: React.FC<ProductPageProps> = ({ language }) => {
 
   return (
     <div className="product-page">
+      {/* Notification */}
+      {notification.show && (
+        <div className="notification">
+          <div className="notification-content">
+            <span>{notification.message}</span>
+            <button 
+              className="notification-close" 
+              onClick={() => setNotification({ show: false, message: "" })}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+      
       <div className="product-container">
         <div className="product-gallery">
           <div className="main-image-container">
@@ -276,11 +333,27 @@ const ProductPage: React.FC<ProductPageProps> = ({ language }) => {
                 </button>
               </div>
               <div className="action-buttons">
-                <button onClick={handleAddToCart} className="btn btn-outline">
-                  {getUIText("addToCart", language)}
+                <button 
+                  onClick={handleAddToCart} 
+                  className="btn btn-outline"
+                  disabled={addingToCart}
+                >
+                  {addingToCart ? (
+                    <span className="loading-spinner-small"></span>
+                  ) : (
+                    getUIText("addToCart", language)
+                  )}
                 </button>
-                <button onClick={handleBuyNow} className="btn btn-primary">
-                  {getUIText("buyNow", language)}
+                <button 
+                  onClick={handleBuyNow} 
+                  className="btn btn-primary"
+                  disabled={addingToCart}
+                >
+                  {addingToCart ? (
+                    <span className="loading-spinner-small"></span>
+                  ) : (
+                    getUIText("buyNow", language)
+                  )}
                 </button>
               </div>
             </div>

@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { getTranslations, Language } from "../utils/language";
-import { Button } from "../components/Button";
 import { formatCurrency } from "../utils/formatCurrency";
 import "./Checkout.css";
 import { CartItem } from "../types";
@@ -179,19 +178,61 @@ const Checkout: React.FC<CheckoutProps> = ({ language }) => {
     setError("");
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Generate random order number
-      const generatedOrderNumber = Math.floor(
-        100000000 + Math.random() * 900000000
-      ).toString();
+      // Step 1: Simulate payment processing
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      // Step 2: Simulate payment validation
+      const isPaymentValid = Math.random() > 0.1; // 90% success rate for simulation
+      
+      if (!isPaymentValid) {
+        throw new Error("Payment validation failed");
+      }
+      
+      // Step 3: Simulate order creation
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      // Generate random order number with prefix
+      const generatedOrderNumber = `LAW7A-${Math.floor(
+        100000 + Math.random() * 900000
+      ).toString()}`;
+      
+      // Step 4: Simulate order confirmation
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      
+      // Save order to localStorage for history (in a real app this would go to a database)
+      const orderData = {
+        id: generatedOrderNumber,
+        date: new Date().toISOString(),
+        items: cart,
+        total: total + shippingCost,
+        shipping: {
+          method: shippingMethod,
+          cost: shippingCost,
+          address: billingInfo
+        },
+        payment: {
+          method: "credit_card",
+          last4: cardInfo.cardNumber.slice(-4)
+        }
+      };
+      
+      // Save to localStorage
+      const savedOrders = localStorage.getItem('orders') 
+        ? JSON.parse(localStorage.getItem('orders') || '[]') 
+        : [];
+      
+      localStorage.setItem('orders', JSON.stringify([...savedOrders, orderData]));
+      
       setOrderNumber(generatedOrderNumber);
       setOrderComplete(true);
       clearCart();
     } catch (err) {
-      setError(t.checkout_error);
       console.error(err);
+      if (err instanceof Error && err.message === "Payment validation failed") {
+        setError(t.checkout_payment_failed);
+      } else {
+        setError(t.checkout_error);
+      }
     } finally {
       setLoading(false);
     }
@@ -225,11 +266,65 @@ const Checkout: React.FC<CheckoutProps> = ({ language }) => {
         <div className="order-complete">
           <div className="order-complete-icon">✓</div>
           <h2>{t.checkout_order_complete}</h2>
-          <p>
+          <p className="order-number">
             {t.checkout_order_number}: <strong>{orderNumber}</strong>
           </p>
-          <p>{t.checkout_order_confirmation_email}</p>
+          <div className="order-details">
+            <div className="order-detail-section">
+              <h3>{t.checkout_order_summary}</h3>
+              <div className="order-items-summary">
+                {cart.map((item: CartItem) => (
+                  <div className="order-item" key={item.productId}>
+                    <div className="order-item-info">
+                      <span className="order-item-title">{item.product.title[language]}</span>
+                      <span className="order-item-quantity">x {item.quantity}</span>
+                    </div>
+                    <span className="order-item-price">
+                      {formatCurrency(item.product.price * item.quantity, "JOD", language)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="order-totals">
+                <div className="order-subtotal">
+                  <span>{t.checkout_subtotal}</span>
+                  <span>{formatCurrency(total, "JOD", language)}</span>
+                </div>
+                <div className="order-shipping-cost">
+                  <span>{t.checkout_shipping}</span>
+                  <span>{formatCurrency(shippingCost, "JOD", language)}</span>
+                </div>
+                <div className="order-total">
+                  <span><strong>{t.checkout_total}</strong></span>
+                  <span><strong>{formatCurrency(total + shippingCost, "JOD", language)}</strong></span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="order-detail-section">
+              <h3>{t.checkout_shipping_info}</h3>
+              <div className="shipping-address">
+                <p>{billingInfo.firstName} {billingInfo.lastName}</p>
+                <p>{billingInfo.address}</p>
+                <p>{billingInfo.city}, {billingInfo.postalCode}</p>
+                <p>{billingInfo.country}</p>
+              </div>
+              <p className="shipping-method">
+                <strong>{t.checkout_shipping_method}:</strong> {
+                  shippingMethod === "standard" 
+                    ? t.checkout_standard_shipping 
+                    : t.checkout_express_shipping
+                }
+              </p>
+            </div>
+          </div>
+          
+          <p className="confirmation-message">{t.checkout_order_confirmation_email}</p>
+          
           <div className="order-actions">
+            <button className="secondary-button" onClick={() => window.print()}>
+              {t.checkout_print_receipt}
+            </button>
             <button className="primary-button" onClick={finishCheckout}>
               {t.checkout_continue_shopping}
             </button>

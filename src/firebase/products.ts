@@ -247,7 +247,7 @@ export const saveProduct = async (
     console.log("Saving product with data:", productData);
     const now = new Date().toISOString();
     // If no productId is provided, create a new one
-    const finalProductId = productId || doc(collection(db, "products")).id;
+    const finalProductId = productId ?? doc(collection(db, "products")).id;
     
     // Prepare product data with images and ensure all required fields exist
     const productToSave = {
