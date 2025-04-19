@@ -180,25 +180,25 @@ const Checkout: React.FC<CheckoutProps> = ({ language }) => {
     try {
       // Step 1: Simulate payment processing
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       // Step 2: Simulate payment validation
       const isPaymentValid = Math.random() > 0.1; // 90% success rate for simulation
-      
+
       if (!isPaymentValid) {
         throw new Error("Payment validation failed");
       }
-      
+
       // Step 3: Simulate order creation
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+
       // Generate random order number with prefix
       const generatedOrderNumber = `LAW7A-${Math.floor(
         100000 + Math.random() * 900000
       ).toString()}`;
-      
+
       // Step 4: Simulate order confirmation
       await new Promise((resolve) => setTimeout(resolve, 500));
-      
+
       // Save order to localStorage for history (in a real app this would go to a database)
       const orderData = {
         id: generatedOrderNumber,
@@ -208,21 +208,24 @@ const Checkout: React.FC<CheckoutProps> = ({ language }) => {
         shipping: {
           method: shippingMethod,
           cost: shippingCost,
-          address: billingInfo
+          address: billingInfo,
         },
         payment: {
           method: "credit_card",
-          last4: cardInfo.cardNumber.slice(-4)
-        }
+          last4: cardInfo.cardNumber.slice(-4),
+        },
       };
-      
+
       // Save to localStorage
-      const savedOrders = localStorage.getItem('orders') 
-        ? JSON.parse(localStorage.getItem('orders') || '[]') 
+      const savedOrders = localStorage.getItem("orders")
+        ? JSON.parse(localStorage.getItem("orders") || "[]")
         : [];
-      
-      localStorage.setItem('orders', JSON.stringify([...savedOrders, orderData]));
-      
+
+      localStorage.setItem(
+        "orders",
+        JSON.stringify([...savedOrders, orderData])
+      );
+
       setOrderNumber(generatedOrderNumber);
       setOrderComplete(true);
       clearCart();
@@ -246,15 +249,33 @@ const Checkout: React.FC<CheckoutProps> = ({ language }) => {
   if (cart.length === 0 && !orderComplete) {
     return (
       <div className="checkout-page">
-        <div className="empty-checkout">
-          <h2>{t.checkout_empty_cart}</h2>
-          <p>{t.checkout_empty_cart_message}</p>
-          <button
-            className="primary-button"
-            onClick={() => navigate("/products")}
-          >
-            {t.checkout_browse_products}
-          </button>
+        <div className="checkout-progress">
+          <div className="progress-step active">
+            <div className="step-number">1</div>
+            <div className="step-name">{t.checkout_shipping}</div>
+          </div>
+          <div className="progress-line"></div>
+          <div className="progress-step">
+            <div className="step-number">2</div>
+            <div className="step-name">{t.checkout_payment}</div>
+          </div>
+          <div className="progress-line"></div>
+          <div className="progress-step">
+            <div className="step-number">3</div>
+            <div className="step-name">{t.checkout_confirmation}</div>
+          </div>
+        </div>
+        <div className="checkout-container">
+          <div className="empty-checkout">
+            <h2>{t.checkout_empty_cart}</h2>
+            <p>{t.checkout_empty_cart_message}</p>
+            <button
+              className="primary-button"
+              onClick={() => navigate("/products")}
+            >
+              {t.checkout_browse_products}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -276,11 +297,19 @@ const Checkout: React.FC<CheckoutProps> = ({ language }) => {
                 {cart.map((item: CartItem) => (
                   <div className="order-item" key={item.productId}>
                     <div className="order-item-info">
-                      <span className="order-item-title">{item.product.title[language]}</span>
-                      <span className="order-item-quantity">x {item.quantity}</span>
+                      <span className="order-item-title">
+                        {item.product.title[language]}
+                      </span>
+                      <span className="order-item-quantity">
+                        x {item.quantity}
+                      </span>
                     </div>
                     <span className="order-item-price">
-                      {formatCurrency(item.product.price * item.quantity, "JOD", language)}
+                      {formatCurrency(
+                        item.product.price * item.quantity,
+                        "JOD",
+                        language
+                      )}
                     </span>
                   </div>
                 ))}
@@ -295,32 +324,43 @@ const Checkout: React.FC<CheckoutProps> = ({ language }) => {
                   <span>{formatCurrency(shippingCost, "JOD", language)}</span>
                 </div>
                 <div className="order-total">
-                  <span><strong>{t.checkout_total}</strong></span>
-                  <span><strong>{formatCurrency(total + shippingCost, "JOD", language)}</strong></span>
+                  <span>
+                    <strong>{t.checkout_total}</strong>
+                  </span>
+                  <span>
+                    <strong>
+                      {formatCurrency(total + shippingCost, "JOD", language)}
+                    </strong>
+                  </span>
                 </div>
               </div>
             </div>
-            
+
             <div className="order-detail-section">
               <h3>{t.checkout_shipping_info}</h3>
               <div className="shipping-address">
-                <p>{billingInfo.firstName} {billingInfo.lastName}</p>
+                <p>
+                  {billingInfo.firstName} {billingInfo.lastName}
+                </p>
                 <p>{billingInfo.address}</p>
-                <p>{billingInfo.city}, {billingInfo.postalCode}</p>
+                <p>
+                  {billingInfo.city}, {billingInfo.postalCode}
+                </p>
                 <p>{billingInfo.country}</p>
               </div>
               <p className="shipping-method">
-                <strong>{t.checkout_shipping_method}:</strong> {
-                  shippingMethod === "standard" 
-                    ? t.checkout_standard_shipping 
-                    : t.checkout_express_shipping
-                }
+                <strong>{t.checkout_shipping_method}:</strong>{" "}
+                {shippingMethod === "standard"
+                  ? t.checkout_standard_shipping
+                  : t.checkout_express_shipping}
               </p>
             </div>
           </div>
-          
-          <p className="confirmation-message">{t.checkout_order_confirmation_email}</p>
-          
+
+          <p className="confirmation-message">
+            {t.checkout_order_confirmation_email}
+          </p>
+
           <div className="order-actions">
             <button className="secondary-button" onClick={() => window.print()}>
               {t.checkout_print_receipt}
@@ -336,387 +376,408 @@ const Checkout: React.FC<CheckoutProps> = ({ language }) => {
 
   return (
     <div className="checkout-page">
-      <div className="checkout-container">
-        {/* Checkout progress */}
-        <div className="checkout-progress">
-          <div className={`progress-step ${step >= 1 ? "active" : ""}`}>
-            <div className="step-number">1</div>
-            <div className="step-name">{t.checkout_shipping}</div>
-          </div>
-          <div className="progress-line"></div>
-          <div className={`progress-step ${step >= 2 ? "active" : ""}`}>
-            <div className="step-number">2</div>
-            <div className="step-name">{t.checkout_payment}</div>
-          </div>
-          <div className="progress-line"></div>
-          <div className={`progress-step ${step >= 3 ? "active" : ""}`}>
-            <div className="step-number">3</div>
-            <div className="step-name">{t.checkout_confirmation}</div>
-          </div>
+      {/* Checkout progress (moved to top) */}
+      <div className="checkout-progress">
+        <div className={`progress-step ${step >= 1 ? "active" : ""}`}>
+          <div className="step-number">1</div>
+          <div className="step-name">{t.checkout_shipping}</div>
         </div>
+        <div className="progress-line"></div>
+        <div className={`progress-step ${step >= 2 ? "active" : ""}`}>
+          <div className="step-number">2</div>
+          <div className="step-name">{t.checkout_payment}</div>
+        </div>
+        <div className="progress-line"></div>
+        <div className={`progress-step ${step >= 3 ? "active" : ""}`}>
+          <div className="step-number">3</div>
+          <div className="step-name">{t.checkout_confirmation}</div>
+        </div>
+      </div>
 
-        {/* Error message */}
-        {error && <div className="checkout-error">{error}</div>}
+      {/* Error message */}
+      {error && <div className="checkout-error">{error}</div>}
 
-        {/* Checkout steps */}
-        <div className="checkout-content">
-          {/* Step 1: Shipping & Billing */}
-          {step === 1 && (
-            <div className="checkout-step">
-              <h2>{t.checkout_shipping_info}</h2>
+      {/* Checkout steps */}
+      <div className="checkout-content">
+        {/* Step 1: Shipping & Billing */}
+        {step === 1 && (
+          <div className="checkout-step">
+            <h2>{t.checkout_shipping_info}</h2>
 
-              <div className="form-grid">
-                <div className="form-group">
-                  <label htmlFor="firstName">{t.checkout_first_name}</label>
-                  <input
-                    type="text"
-                    id="firstName"
-                    name="firstName"
-                    value={billingInfo.firstName}
-                    onChange={handleBillingChange}
-                    required
-                  />
+            <div className="form-grid">
+              <div className="form-group">
+                <label htmlFor="firstName">{t.checkout_first_name}</label>
+                <input
+                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  value={billingInfo.firstName}
+                  onChange={handleBillingChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="lastName">{t.checkout_last_name}</label>
+                <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  value={billingInfo.lastName}
+                  onChange={handleBillingChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="email">{t.checkout_email}</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={billingInfo.email}
+                  onChange={handleBillingChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="phone">{t.checkout_phone}</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={billingInfo.phone}
+                  onChange={handleBillingChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group full-width">
+                <label htmlFor="address">{t.checkout_address}</label>
+                <input
+                  type="text"
+                  id="address"
+                  name="address"
+                  value={billingInfo.address}
+                  onChange={handleBillingChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="city">{t.checkout_city}</label>
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
+                  value={billingInfo.city}
+                  onChange={handleBillingChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="country">{t.checkout_country}</label>
+                <select
+                  id="country"
+                  name="country"
+                  value={billingInfo.country}
+                  onChange={handleBillingChange}
+                  required
+                >
+                  <option value="">{t.checkout_select_country}</option>
+                  <option value="Egypt">{t.checkout_egypt}</option>
+                  <option value="Saudi Arabia">
+                    {t.checkout_saudi_arabia}
+                  </option>
+                  <option value="UAE">{t.checkout_uae}</option>
+                  <option value="Kuwait">{t.checkout_kuwait}</option>
+                  <option value="Qatar">{t.checkout_qatar}</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="postalCode">{t.checkout_postal_code}</label>
+                <input
+                  type="text"
+                  id="postalCode"
+                  name="postalCode"
+                  value={billingInfo.postalCode}
+                  onChange={handleBillingChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <h3>{t.checkout_shipping_method}</h3>
+            <div className="shipping-methods">
+              <div className="shipping-method">
+                <input
+                  type="radio"
+                  id="shipping-standard"
+                  name="shipping"
+                  value="standard"
+                  checked={shippingMethod === "standard"}
+                  onChange={() => setShippingMethod("standard")}
+                />
+                <span className="shipping-method-icon" aria-hidden="true">🚚</span>
+                <label htmlFor="shipping-standard">
+                  <div className="shipping-method-details">
+                    <span className="shipping-method-name">{t.checkout_standard_shipping}</span>
+                    <span className="shipping-method-price">$5.00</span>
+                    <span className="shipping-method-time">{t.checkout_standard_shipping_time}</span>
+                  </div>
+                </label>
+              </div>
+              <div className="shipping-method">
+                <input
+                  type="radio"
+                  id="shipping-express"
+                  name="shipping"
+                  value="express"
+                  checked={shippingMethod === "express"}
+                  onChange={() => setShippingMethod("express")}
+                />
+                <span className="shipping-method-icon" aria-hidden="true">⚡</span>
+                <label htmlFor="shipping-express">
+                  <div className="shipping-method-details">
+                    <span className="shipping-method-name">{t.checkout_express_shipping}</span>
+                    <span className="shipping-method-price">$15.00</span>
+                    <span className="shipping-method-time">{t.checkout_express_shipping_time}</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div className="checkout-actions">
+              <button className="primary-button" onClick={goToNextStep}>
+                {t.checkout_continue_to_payment}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Payment Information */}
+        {step === 2 && (
+          <div className="checkout-step">
+            <h2>{t.checkout_payment_info}</h2>
+
+            <div className="form-grid">
+              <div className="form-group full-width">
+                <label htmlFor="cardNumber">{t.checkout_card_number}</label>
+                <input
+                  type="text"
+                  id="cardNumber"
+                  name="cardNumber"
+                  value={cardInfo.cardNumber}
+                  onChange={handleCardChange}
+                  placeholder="0000 0000 0000 0000"
+                  required
+                />
+              </div>
+
+              <div className="form-group full-width">
+                <label htmlFor="cardName">{t.checkout_name_on_card}</label>
+                <input
+                  type="text"
+                  id="cardName"
+                  name="cardName"
+                  value={cardInfo.cardName}
+                  onChange={handleCardChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="expiryDate">{t.checkout_expiry_date}</label>
+                <input
+                  type="text"
+                  id="expiryDate"
+                  name="expiryDate"
+                  value={cardInfo.expiryDate}
+                  onChange={handleCardChange}
+                  placeholder="MM/YY"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="cvv">{t.checkout_cvv}</label>
+                <input
+                  type="text"
+                  id="cvv"
+                  name="cvv"
+                  value={cardInfo.cvv}
+                  onChange={handleCardChange}
+                  placeholder="123"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="checkout-actions">
+              <button className="secondary-button" onClick={goToPreviousStep}>
+                {t.checkout_back}
+              </button>
+              <button className="primary-button" onClick={goToNextStep}>
+                {t.checkout_review_order}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Order Review */}
+        {step === 3 && (
+          <div className="checkout-step">
+            <h2>{t.checkout_review_your_order}</h2>
+
+            <div className="order-summary">
+              <h3>{t.checkout_order_items}</h3>
+              <div className="checkout-items">
+                {cart.map((item: CartItem) => (
+                  <div className="checkout-item" key={item.productId}>
+                    <div className="checkout-item-image">
+                      <img
+                        src={item.product.images[0]}
+                        alt={item.product.title.en}
+                      />
+                    </div>
+                    <div className="checkout-item-details">
+                      <h4>{item.product.title.en}</h4>
+                      <p>
+                        {formatCurrency(item.product.price, "JOD")} x{" "}
+                        {item.quantity}
+                      </p>
+                    </div>
+                    <div className="checkout-item-total">
+                      {formatCurrency(
+                        item.product.price * item.quantity,
+                        "JOD"
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="checkout-summary">
+                <div className="summary-row">
+                  <span>{t.cart_subtotal}</span>
+                  <span>${total.toFixed(2)}</span>
                 </div>
-
-                <div className="form-group">
-                  <label htmlFor="lastName">{t.checkout_last_name}</label>
-                  <input
-                    type="text"
-                    id="lastName"
-                    name="lastName"
-                    value={billingInfo.lastName}
-                    onChange={handleBillingChange}
-                    required
-                  />
+                <div className="summary-row">
+                  <span>{t.checkout_shipping}</span>
+                  <span>${shippingCost.toFixed(2)}</span>
                 </div>
-
-                <div className="form-group">
-                  <label htmlFor="email">{t.checkout_email}</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={billingInfo.email}
-                    onChange={handleBillingChange}
-                    required
-                  />
+                <div className="summary-row total">
+                  <span>{t.cart_total}</span>
+                  <span>${(total + shippingCost).toFixed(2)}</span>
                 </div>
+              </div>
 
-                <div className="form-group">
-                  <label htmlFor="phone">{t.checkout_phone}</label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={billingInfo.phone}
-                    onChange={handleBillingChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group full-width">
-                  <label htmlFor="address">{t.checkout_address}</label>
-                  <input
-                    type="text"
-                    id="address"
-                    name="address"
-                    value={billingInfo.address}
-                    onChange={handleBillingChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="city">{t.checkout_city}</label>
-                  <input
-                    type="text"
-                    id="city"
-                    name="city"
-                    value={billingInfo.city}
-                    onChange={handleBillingChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="country">{t.checkout_country}</label>
-                  <select
-                    id="country"
-                    name="country"
-                    value={billingInfo.country}
-                    onChange={handleBillingChange}
-                    required
-                  >
-                    <option value="">{t.checkout_select_country}</option>
-                    <option value="Egypt">{t.checkout_egypt}</option>
-                    <option value="Saudi Arabia">
-                      {t.checkout_saudi_arabia}
-                    </option>
-                    <option value="UAE">{t.checkout_uae}</option>
-                    <option value="Kuwait">{t.checkout_kuwait}</option>
-                    <option value="Qatar">{t.checkout_qatar}</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="postalCode">{t.checkout_postal_code}</label>
-                  <input
-                    type="text"
-                    id="postalCode"
-                    name="postalCode"
-                    value={billingInfo.postalCode}
-                    onChange={handleBillingChange}
-                    required
-                  />
-                </div>
+              <h3>{t.checkout_shipping_address}</h3>
+              <div className="checkout-address">
+                <p>
+                  {billingInfo.firstName} {billingInfo.lastName}
+                  <br />
+                  {billingInfo.address}
+                  <br />
+                  {billingInfo.city}, {billingInfo.postalCode}
+                  <br />
+                  {billingInfo.country}
+                  <br />
+                  {billingInfo.email}
+                  <br />
+                  {billingInfo.phone}
+                </p>
               </div>
 
               <h3>{t.checkout_shipping_method}</h3>
-              <div className="shipping-methods">
-                <div className="shipping-method">
-                  <input
-                    type="radio"
-                    id="shipping-standard"
-                    name="shipping"
-                    value="standard"
-                    checked={shippingMethod === "standard"}
-                    onChange={() => setShippingMethod("standard")}
-                  />
-                  <label htmlFor="shipping-standard">
-                    <div className="shipping-method-name">
-                      {t.checkout_standard_shipping}
-                    </div>
-                    <div className="shipping-method-price">$5.00</div>
-                    <div className="shipping-method-time">
-                      {t.checkout_standard_shipping_time}
-                    </div>
-                  </label>
-                </div>
-
-                <div className="shipping-method">
-                  <input
-                    type="radio"
-                    id="shipping-express"
-                    name="shipping"
-                    value="express"
-                    checked={shippingMethod === "express"}
-                    onChange={() => setShippingMethod("express")}
-                  />
-                  <label htmlFor="shipping-express">
-                    <div className="shipping-method-name">
-                      {t.checkout_express_shipping}
-                    </div>
-                    <div className="shipping-method-price">$15.00</div>
-                    <div className="shipping-method-time">
-                      {t.checkout_express_shipping_time}
-                    </div>
-                  </label>
-                </div>
+              <div className="checkout-shipping-method">
+                <p>
+                  {shippingMethod === "standard"
+                    ? t.checkout_standard_shipping
+                    : t.checkout_express_shipping}
+                  {" - "}${shippingCost.toFixed(2)}
+                </p>
               </div>
 
-              <div className="checkout-actions">
-                <button className="primary-button" onClick={goToNextStep}>
-                  {t.checkout_continue_to_payment}
-                </button>
+              <h3>{t.checkout_payment_method}</h3>
+              <div className="checkout-payment-method">
+                <p>
+                  {t.checkout_credit_card} - {cardInfo.cardNumber.slice(-4)}
+                </p>
               </div>
             </div>
-          )}
 
-          {/* Step 2: Payment Information */}
-          {step === 2 && (
-            <div className="checkout-step">
-              <h2>{t.checkout_payment_info}</h2>
-
-              <div className="form-grid">
-                <div className="form-group full-width">
-                  <label htmlFor="cardNumber">{t.checkout_card_number}</label>
-                  <input
-                    type="text"
-                    id="cardNumber"
-                    name="cardNumber"
-                    value={cardInfo.cardNumber}
-                    onChange={handleCardChange}
-                    placeholder="0000 0000 0000 0000"
-                    required
-                  />
-                </div>
-
-                <div className="form-group full-width">
-                  <label htmlFor="cardName">{t.checkout_name_on_card}</label>
-                  <input
-                    type="text"
-                    id="cardName"
-                    name="cardName"
-                    value={cardInfo.cardName}
-                    onChange={handleCardChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="expiryDate">{t.checkout_expiry_date}</label>
-                  <input
-                    type="text"
-                    id="expiryDate"
-                    name="expiryDate"
-                    value={cardInfo.expiryDate}
-                    onChange={handleCardChange}
-                    placeholder="MM/YY"
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="cvv">{t.checkout_cvv}</label>
-                  <input
-                    type="text"
-                    id="cvv"
-                    name="cvv"
-                    value={cardInfo.cvv}
-                    onChange={handleCardChange}
-                    placeholder="123"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="checkout-actions">
-                <button className="secondary-button" onClick={goToPreviousStep}>
-                  {t.checkout_back}
-                </button>
-                <button className="primary-button" onClick={goToNextStep}>
-                  {t.checkout_review_order}
-                </button>
-              </div>
+            <div className="checkout-actions">
+              <button className="secondary-button" onClick={goToPreviousStep}>
+                {t.checkout_back}
+              </button>
+              <button
+                className="primary-button"
+                onClick={submitOrder}
+                disabled={loading}
+              >
+                {loading ? t.checkout_processing : t.checkout_place_order}
+              </button>
             </div>
-          )}
+          </div>
+        )}
+      </div>
 
-          {/* Step 3: Order Review */}
-          {step === 3 && (
-            <div className="checkout-step">
-              <h2>{t.checkout_review_your_order}</h2>
-
-              <div className="order-summary">
-                <h3>{t.checkout_order_items}</h3>
-                <div className="checkout-items">
-                  {cart.map((item: CartItem) => (
-                    <div className="checkout-item" key={item.productId}>
-                      <div className="checkout-item-image">
-                        <img
-                          src={item.product.images[0]}
-                          alt={item.product.title.en}
-                        />
-                      </div>
-                      <div className="checkout-item-details">
-                        <h4>{item.product.title.en}</h4>
-                        <p>
-                          {formatCurrency(item.product.price, "JOD")} x {item.quantity}
-                        </p>
-                      </div>
-                      <div className="checkout-item-total">
-                        {formatCurrency(item.product.price * item.quantity, "JOD")}
-                      </div>
-                    </div>
-                  ))}
+      {/* Order summary sidebar */}
+      <div className="checkout-sidebar">
+        <div className="checkout-summary-box">
+          <h3>{t.checkout_order_summary}</h3>
+          <div className="summary-items">
+            {cart.map((item: CartItem) => (
+              <div className="summary-item" key={item.productId}>
+                <div className="summary-item-image">
+                  <img
+                    src={item.product.images && item.product.images[0]}
+                    alt={item.product.title[language]}
+                    style={{
+                      width: 48,
+                      height: 48,
+                      objectFit: "cover",
+                      borderRadius: 6,
+                      marginRight: 8,
+                    }}
+                  />
                 </div>
-
-                <div className="checkout-summary">
-                  <div className="summary-row">
-                    <span>{t.cart_subtotal}</span>
-                    <span>${total.toFixed(2)}</span>
-                  </div>
-                  <div className="summary-row">
-                    <span>{t.checkout_shipping}</span>
-                    <span>${shippingCost.toFixed(2)}</span>
-                  </div>
-                  <div className="summary-row total">
-                    <span>{t.cart_total}</span>
-                    <span>${(total + shippingCost).toFixed(2)}</span>
-                  </div>
-                </div>
-
-                <h3>{t.checkout_shipping_address}</h3>
-                <div className="checkout-address">
-                  <p>
-                    {billingInfo.firstName} {billingInfo.lastName}
-                    <br />
-                    {billingInfo.address}
-                    <br />
-                    {billingInfo.city}, {billingInfo.postalCode}
-                    <br />
-                    {billingInfo.country}
-                    <br />
-                    {billingInfo.email}
-                    <br />
-                    {billingInfo.phone}
-                  </p>
-                </div>
-
-                <h3>{t.checkout_shipping_method}</h3>
-                <div className="checkout-shipping-method">
-                  <p>
-                    {shippingMethod === "standard"
-                      ? t.checkout_standard_shipping
-                      : t.checkout_express_shipping}
-                    {" - "}${shippingCost.toFixed(2)}
-                  </p>
-                </div>
-
-                <h3>{t.checkout_payment_method}</h3>
-                <div className="checkout-payment-method">
-                  <p>
-                    {t.checkout_credit_card} - {cardInfo.cardNumber.slice(-4)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="checkout-actions">
-                <button className="secondary-button" onClick={goToPreviousStep}>
-                  {t.checkout_back}
-                </button>
-                <button
-                  className="primary-button"
-                  onClick={submitOrder}
-                  disabled={loading}
-                >
-                  {loading ? t.checkout_processing : t.checkout_place_order}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Order summary sidebar */}
-        <div className="checkout-sidebar">
-          <div className="checkout-summary-box">
-            <h3>{t.checkout_order_summary}</h3>
-
-            <div className="summary-items">
-              {cart.map((item: CartItem) => (
-                <div className="summary-item" key={item.productId}>
-                  <span>
-                    {item.product.title.en} x {item.quantity}
+                <div className="summary-item-details">
+                  <span className="summary-item-title">
+                    {item.product.title[language]}
                   </span>
-                  <span>
-                    {formatCurrency(item.product.price * item.quantity, "JOD")}
+                  <span className="summary-item-quantity">
+                    x {item.quantity}
                   </span>
                 </div>
-              ))}
+                <span className="summary-item-price">
+                  {formatCurrency(
+                    item.product.price * item.quantity,
+                    "JOD",
+                    language
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
+          <div className="summary-totals">
+            <div className="summary-row">
+              <span>{t.cart_subtotal}</span>
+              <span>{formatCurrency(total, "JOD", language)}</span>
             </div>
-
-            <div className="summary-totals">
-              <div className="summary-row">
-                <span>{t.cart_subtotal}</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
-              <div className="summary-row">
-                <span>{t.checkout_shipping}</span>
-                <span>${shippingCost.toFixed(2)}</span>
-              </div>
-              <div className="summary-row total">
-                <span>{t.cart_total}</span>
-                <span>${(total + shippingCost).toFixed(2)}</span>
-              </div>
+            <div className="summary-row">
+              <span>{t.checkout_shipping}</span>
+              <span>{formatCurrency(shippingCost, "JOD", language)}</span>
+            </div>
+            <div className="summary-row total">
+              <span>{t.cart_total}</span>
+              <span>
+                {formatCurrency(total + shippingCost, "JOD", language)}
+              </span>
             </div>
           </div>
         </div>

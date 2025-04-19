@@ -5,6 +5,7 @@ import { getUIText } from "../utils/language";
 import { mockProducts, mockArtists } from "../utils/mockData";
 import ProductCard from "../components/products/ProductCard";
 import ArtistCard from "../components/artist/ArtistCard";
+import { useAuth } from "../context/AuthContext";
 import "./Home.css";
 
 interface HomeProps {
@@ -12,6 +13,10 @@ interface HomeProps {
 }
 
 const Home: React.FC<HomeProps> = ({ language }) => {
+  // Get authentication context
+  const { currentUser, isAuthenticated } = useAuth();
+  const isArtist = currentUser?.isArtist || false;
+
   // Get featured products and artists
   const featuredProducts = mockProducts.filter((product) => product.featured);
   const featuredArtists = mockArtists.filter((artist) => artist.featured);
@@ -31,21 +36,27 @@ const Home: React.FC<HomeProps> = ({ language }) => {
         <div className="hero-content">
           <h1 className="hero-title">
             {language === "en"
-              ? "Discover Authentic Jordanian Art"
-              : "اكتشف الفن الأردني الأصيل"}
+              ? "Jordanian Art & Craftsmanship"
+              : "الفن والحرف الأردنية"}
           </h1>
           <p className="hero-subtitle">
             {language === "en"
-              ? "Supporting local artists and craftspeople in Amman"
-              : "دعم الفنانين والحرفيين المحليين في عمان"}
+              ? "Curated collection of authentic pieces from talented artists across Jordan"
+              : "مجموعة مختارة من القطع الأصيلة من الفنانين الموهوبين في جميع أنحاء الأردن"}
           </p>
           <div className="hero-cta">
             <Link to="/search" className="btn btn-primary">
-              {getUIText("explore", language)}
+              {language === "en" ? "EXPLORE COLLECTION" : "استكشف المجموعة"}
             </Link>
-            <Link to="/signup" className="btn btn-outline">
-              {language === "en" ? "Join as Artist" : "انضم كفنان"}
-            </Link>
+            {isAuthenticated && isArtist ? (
+              <Link to="/profile" className="btn btn-outline">
+                {language === "en" ? "MANAGE YOUR COLLECTION" : "إدارة مجموعتك"}
+              </Link>
+            ) : (
+              <Link to="/signup" className="btn btn-outline">
+                {language === "en" ? "BECOME AN ARTIST" : "كن فناناً"}
+              </Link>
+            )}
           </div>
         </div>
         <div className="pattern-overlay"></div>

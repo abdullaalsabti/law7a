@@ -1,0 +1,20 @@
+0 verbose cli /Users/abdullaal-sabti/.nvm/versions/node/v20.18.1/bin/node /Users/abdullaal-sabti/.nvm/versions/node/v20.18.1/bin/npm
+1 info using npm@11.1.0
+2 info using node@v20.18.1
+3 silly config load:file:/Users/abdullaal-sabti/.nvm/versions/node/v20.18.1/lib/node_modules/npm/npmrc
+4 warn invalid config only="hosting" set in command line options
+5 warn invalid config Must be one of: null, prod, production
+6 silly config load:file:/Volumes/2TBKINGSTON/Law7a/law7a/.npmrc
+7 silly config load:file:/Users/abdullaal-sabti/.npmrc
+8 silly config load:file:/Users/abdullaal-sabti/.nvm/versions/node/v20.18.1/etc/npmrc
+9 verbose title npm deploy firebase
+10 verbose argv "deploy" "firebase" "--only" "hosting"
+11 verbose logfile logs-max:10 dir:/Volumes/2TBKINGSTON/Law7a/law7a/npm-cache/_logs/2025-04-19T09_38_42_028Z-
+12 verbose logfile /Volumes/2TBKINGSTON/Law7a/law7a/npm-cache/_logs/2025-04-19T09_38_42_028Z-debug-0.log
+13 silly logfile start cleaning logs, removing 1 files
+14 verbose cwd /Volumes/2TBKINGSTON/Law7a/law7a
+15 verbose os Darwin 24.3.0
+16 verbose node v20.18.1
+17 verbose npm  v11.1.0
+18 verbose exit 1
+19 verbose code 1

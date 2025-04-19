@@ -173,6 +173,15 @@ export const getUIText = (key: string, language: Language): string => {
     noResults: { en: "No results found", ar: "لم يتم العثور على نتائج" },
     error: { en: "An error occurred", ar: "حدث خطأ" },
     success: { en: "Success", ar: "نجاح" },
+    
+    // Profile
+    profile: { en: "Profile", ar: "الملف الشخصي" },
+    products: { en: "Products", ar: "المنتجات" },
+    editProfile: { en: "Edit Profile", ar: "تعديل الملف الشخصي" },
+    saveChanges: { en: "Save Changes", ar: "حفظ التغييرات" },
+    saving: { en: "Saving...", ar: "جاري الحفظ..." },
+    profilePictureUpdated: { en: "Profile picture updated successfully!", ar: "تم تحديث صورة الملف الشخصي بنجاح!" },
+    uploadFailed: { en: "Upload failed", ar: "فشل التحميل" },
   };
 
   return uiText[key] ? uiText[key][language] : key;

@@ -159,7 +159,7 @@
 }
 
 .auth-info {
-  background: linear-gradient(135deg, var(--primary-color), #4527a0);
+  background: linear-gradient(135deg, var(--primary-color), var(--color-rose-gold));
   color: white;
   padding: 3rem;
   display: flex;
@@ -195,7 +195,7 @@
 }
 
 .auth-benefits {
-  list-style-type: none;
+  list-style-type: circle;
   padding: 0;
   margin: 1.5rem 0 0;
 }

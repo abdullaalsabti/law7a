@@ -5,6 +5,8 @@ import { getUIText } from "../../utils/language";
 import "./Header.css";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
+import { FaShoppingCart, FaUser, FaSignOutAlt } from "react-icons/fa";
+import { IconWrapper } from "../ui/IconWrapper";
 
 interface HeaderProps {
   language: Language;
@@ -13,7 +15,6 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ language, toggleLanguage }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
   const { isAuthenticated, currentUser, logout } = useAuth();
   const { cartCount } = useCart();
@@ -22,13 +23,7 @@ const Header: React.FC<HeaderProps> = ({ language, toggleLanguage }) => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery("");
-    }
-  };
+
 
   const handleLogout = () => {
     logout();
@@ -44,19 +39,7 @@ const Header: React.FC<HeaderProps> = ({ language, toggleLanguage }) => {
           </Link>
         </div>
 
-        <div className="search-bar">
-          <form onSubmit={handleSearch}>
-            <input
-              type="text"
-              placeholder={getUIText("search", language)}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button type="submit" aria-label={getUIText("search", language)}>
-              🔍
-            </button>
-          </form>
-        </div>
+
 
         <div className="mobile-controls">
           <button
@@ -101,8 +84,10 @@ const Header: React.FC<HeaderProps> = ({ language, toggleLanguage }) => {
                 to="/cart"
                 className="cart-link"
                 onClick={() => setIsMenuOpen(false)}
+                aria-label={getUIText("cart", language)}
+                title={getUIText("cart", language)}
               >
-                {getUIText("cart", language)}
+                <IconWrapper icon={FaShoppingCart} size={24} />
                 {cartCount > 0 && (
                   <span className="cart-count">{cartCount}</span>
                 )}
@@ -111,11 +96,24 @@ const Header: React.FC<HeaderProps> = ({ language, toggleLanguage }) => {
             <li className="auth-links">
               {isAuthenticated ? (
                 <>
-                  <Link to={`/profile`} onClick={() => setIsMenuOpen(false)}>
-                    {currentUser?.name}
+                  <Link 
+                    to="/profile" 
+                    onClick={() => setIsMenuOpen(false)}
+                    className="profile-link"
+                    aria-label={getUIText("profile", language)}
+                    title={currentUser?.name ?? getUIText("profile", language)}
+                  >
+                    <IconWrapper icon={FaUser} size={24} />
+                    <span className="user-name">{currentUser?.name ?? getUIText("profile", language)}</span>
                   </Link>
-                  <button onClick={handleLogout} className="logout-btn">
-                    {getUIText("logout", language)}
+                  <button 
+                    onClick={handleLogout} 
+                    className="logout-btn"
+                    aria-label={getUIText("logout", language)}
+                    title={getUIText("logout", language)}
+                  >
+                    <IconWrapper icon={FaSignOutAlt} size={24} />
+                    <span className="logout-text">{getUIText("logout", language)}</span>
                   </button>
                 </>
               ) : (

@@ -314,12 +314,94 @@
 
 .shipping-method {
   display: flex;
+  align-items: center;
+  background: #fff;
+  border: 2px solid var(--color-border);
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  padding: 12px 18px;
+  gap: 14px;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  cursor: pointer;
+  position: relative;
+  min-height: 56px;
+  font-size: 15px;
+  max-width: 420px;
+}
+.shipping-method:has(input:checked) {
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px 0 rgba(96,71,170,0.09);
+  background: linear-gradient(90deg, #f7f5ff 0%, #fff 100%);
+}
+.shipping-method:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 10px 0 rgba(96,71,170,0.08);
+}
+.shipping-method-icon {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+.shipping-method label {
+  flex-grow: 1;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+}
+.shipping-method-details {
+  display: flex;
+  flex-direction: column;
   align-items: flex-start;
-  background-color: white;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  padding: 15px;
-  transition: all 0.3s;
+  gap: 2px;
+  font-size: 15px;
+}
+.shipping-method-name {
+  font-weight: 600;
+  margin-bottom: 0;
+  font-size: 15px;
+}
+.shipping-method-price {
+  color: var(--color-accent);
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 0;
+}
+.shipping-method-time {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+.shipping-method input[type="radio"] {
+  margin-top: 0;
+  margin-right: 10px;
+  accent-color: var(--color-accent);
+}
+.shipping-method:has(input:checked) {
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 16px 0 rgba(96,71,170,0.13);
+  background: linear-gradient(90deg, #f7f5ff 0%, #fff 100%);
+}
+.shipping-method:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 2px 12px 0 rgba(96,71,170,0.10);
+}
+.shipping-method-icon {
+  font-size: 2.2rem;
+  color: var(--primary-color);
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+.shipping-method label {
+  flex-grow: 1;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .shipping-method input[type="radio"] {
@@ -362,9 +444,30 @@
 }
 
 .checkout-actions button {
-  padding: 12px 25px;
-  font-size: 16px;
-  font-weight: 600;
+  padding: 14px 34px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 8px;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 18px 0 rgba(96,71,170,0.10);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+.checkout-actions button:hover, .checkout-actions button:focus {
+  background: var(--color-accent);
+  box-shadow: 0 6px 22px 0 rgba(96,71,170,0.18);
+  transform: translateY(-2px) scale(1.03);
+  color: #fff;
+}
+.checkout-actions .secondary-button {
+  background: #fff;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+}
+.checkout-actions .secondary-button:hover, .checkout-actions .secondary-button:focus {
+  background: var(--primary-color);
+  color: #fff;
 }
 
 /* Order review styles */

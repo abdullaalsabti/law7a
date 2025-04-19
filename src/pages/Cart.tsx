@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Language } from "../types";
 import {
   getTextByLanguage,
@@ -7,6 +7,7 @@ import {
   getUIText,
 } from "../utils/language";
 import { useCart } from "../context/CartContext";
+import ConfirmationDialog from "../components/ui/ConfirmationDialog";
 import "./Cart.css";
 
 interface CartProps {
@@ -16,6 +17,8 @@ interface CartProps {
 const Cart: React.FC<CartProps> = ({ language }) => {
   const { cartItems, removeFromCart, updateQuantity, cartTotal, clearCart } =
     useCart();
+  const navigate = useNavigate();
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
   const handleQuantityChange = (productId: string, newQuantity: number) => {
     updateQuantity(productId, newQuantity);
@@ -26,16 +29,17 @@ const Cart: React.FC<CartProps> = ({ language }) => {
   };
 
   const handleClearCart = () => {
-    // Confirm before clearing
-    if (
-      window.confirm(
-        language === "en"
-          ? "Are you sure you want to clear your cart?"
-          : "هل أنت متأكد أنك تريد إفراغ سلة التسوق؟"
-      )
-    ) {
-      clearCart();
-    }
+    // Open confirmation dialog instead of using browser's confirm
+    setIsConfirmDialogOpen(true);
+  };
+
+  const confirmClearCart = () => {
+    clearCart();
+  };
+
+  const handleCheckout = () => {
+    // Navigate to checkout page
+    navigate('/checkout');
   };
 
   if (cartItems.length === 0) {
@@ -176,7 +180,10 @@ const Cart: React.FC<CartProps> = ({ language }) => {
             <span>{formatCurrency(cartTotal, "JOD", language)}</span>
           </div>
 
-          <button className="btn btn-primary checkout-btn">
+          <button 
+            className="btn btn-primary checkout-btn"
+            onClick={handleCheckout}
+          >
             {getUIText("checkout", language)}
           </button>
 
@@ -190,6 +197,22 @@ const Cart: React.FC<CartProps> = ({ language }) => {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog for clearing cart */}
+      <ConfirmationDialog
+        isOpen={isConfirmDialogOpen}
+        onClose={() => setIsConfirmDialogOpen(false)}
+        onConfirm={confirmClearCart}
+        title={language === "en" ? "Clear Shopping Cart" : "إفراغ سلة التسوق"}
+        message={
+          language === "en"
+            ? "Are you sure you want to remove all items from your cart?"
+            : "هل أنت متأكد أنك تريد إزالة جميع العناصر من سلة التسوق؟"
+        }
+        confirmText={language === "en" ? "Clear Cart" : "إفراغ السلة"}
+        cancelText={language === "en" ? "Cancel" : "إلغاء"}
+        language={language}
+      />
     </div>
   );
 };

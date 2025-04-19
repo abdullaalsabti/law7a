@@ -289,7 +289,7 @@ const ProductEdit: React.FC<ProductEditProps> = ({ language }) => {
         title: formData.title,
         description: formData.description,
         price: formData.price,
-        currency: "JOD",
+        currency: "JOD" as "JOD" | "USD", // Type assertion to ensure it matches the union type
         category: formData.category,
         medium: formData.medium,
         dimensions: formData.dimensions,
